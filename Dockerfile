@@ -26,10 +26,10 @@ FROM golang:1.22.1 as builder
 WORKDIR /app
 
 # # Copy go mod and sum files along with the vendor directory
-COPY src/go.mod src/go.sum ./
+COPY go.mod go.sum ./
 
 # # Copy the source code
-COPY src/*.go ./
+COPY *.go ./
 
 RUN go mod tidy
 
