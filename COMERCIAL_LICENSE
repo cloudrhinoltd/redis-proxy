@@ -4,11 +4,11 @@ Version 1.0
 
 Effective Date: 11th of Aug 2024
 
-Copyright (c) 2024 Dmitry Kryuchkov. All rights reserved.
+Copyright (c) Cloud Rhino Pty Ltd. All rights reserved.
 
 1. Definitions
 
-1.1. "Software" refers to the Redis proxy for containers provided by Dmitry Kryuchkov, including all associated documentation, files, and modifications.
+1.1. "Software" refers to the Redis proxy for containers provided by Cloud Rhino Pty Ltd, including all associated documentation, files, and modifications.
 
 1.2. "User" refers to any individual or entity that obtains a copy of the Software.
 
@@ -20,7 +20,7 @@ Copyright (c) 2024 Dmitry Kryuchkov. All rights reserved.
 
 2.1. Subject to the terms and conditions of this License Agreement, the copyright holder hereby grants the User a non-exclusive, non-transferable, and non-sublicensable license to use, copy, modify, and distribute the Software, subject to the following conditions.
 
-2.2. Connection Limit: The Software may be used with a maximum of 5 Concurrent Client Connections. For use with more than 5 Concurrent Client Connections, the User must obtain a commercial license by contacting the copyright holder at kryuchkov@hotmail.com.
+2.2. Connection Limit: The Software may be used with a maximum of 5 Concurrent Client Connections. For use with more than 5 Concurrent Client Connections, the User must obtain a commercial license by contacting the copyright holder at cloudrhinoltd@gmail.com.
 
 2.3. Commercial Use: The Software may be used for Commercial Use, provided that the number of Concurrent Client Connections does not exceed 5. Any use beyond this limit requires a commercial license.
 
@@ -40,7 +40,7 @@ Copyright (c) 2024 Dmitry Kryuchkov. All rights reserved.
 
 4. Commercial Licensing
 
-4.1. Requirement: Users who wish to use the Software with more than 5 Concurrent Client Connections, or who wish to sell or sublicense the Software or derivative works, must obtain a commercial license by contacting the copyright holder at kryuchkov@hotmail.com.
+4.1. Requirement: Users who wish to use the Software with more than 5 Concurrent Client Connections, or who wish to sell or sublicense the Software or derivative works, must obtain a commercial license by contacting the copyright holder at cloudrhinoltd@gmail.com.
 
 4.2. Negotiation: The terms of the commercial license, including but not limited to fees, royalties, and usage rights, shall be determined through negotiation with the copyright holder.
 
@@ -66,9 +66,10 @@ This License Agreement constitutes the entire agreement between the User and the
 
 Contact Information
 
-For any inquiries, including requests for commercial licenses, please contact:
-
-Dmitry Kryuchkov
-Email: kryuchkov@hotmail.com
+For more information on purchasing a commercial license, please contact:
+Cloud Rhino Pty Ltd
+Email: cloudrhinoltd@gmail.com
+Website: https://cloudrhino.netlify.app
+GitHub: https://github.com/cloudrhinoltd/redis-proxy
 
 END OF LICENSE AGREEMENT

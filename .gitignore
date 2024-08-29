@@ -38,3 +38,7 @@ go.work
 
 # Windows files
 Thumbs.db
+
+# Local
+*.local.*
+.vscode/** */

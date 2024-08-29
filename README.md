@@ -17,7 +17,7 @@ This project is available under a dual-license model:
 
 2. **Commercial License**:  
    - For commercial use cases that exceed 5 concurrent client connections, a separate commercial license is required.  
-   - Please contact Dmitry Kryuchkov at **kryuchkov@hotmail.com** to discuss commercial licensing options.
+   - Please contact Cloud Rhino Pty Ltd at **cloudrhinoltd@gmail.com** to discuss commercial licensing options.
 
 ### Summary of Terms
 
@@ -33,8 +33,8 @@ This project is available under a dual-license model:
 
 For commercial licensing inquiries, please contact:
 
-**Dmitry Kryuchkov**  
-**Email:** kryuchkov@hotmail.com
+**Cloud Rhino Pty Ltd**  
+**Email:** cloudrhinoltd@gmail.com
 
 ## Disclaimer
 
@@ -90,7 +90,7 @@ The proxy processes Redis commands robustly by:
 To use the Redis Proxy, clone this repository and build the project:
 
 ```bash
-git clone https://github.com/dmitry-kryuchkov/redis-proxy.git
+git clone https://github.com/cloudrhinoltd/redis-proxy.git
 cd redis-proxy
 go build -o redis-proxy
 ```
@@ -203,5 +203,5 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## Authors
 
-- **Dmitry Kryuchkov** - *Initial work* - [Dmitry Kryuchkov GitHub Profile](https://github.com/dkryuchkov)
+- **Cloud Rhino Pty Ltd** - *Initial work* - [Cloud Rhino Pty Ltd GitHub Profile](https://github.com/cloudrhinoltd)
 

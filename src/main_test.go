@@ -1,3 +1,24 @@
+# Copyright (C) 2024 Cloud Rhino Pty Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# This Dockerfile contains parts under a dual-license:
+# Only the 'enable_protocol_attack' and 'enable_general_rules' features are 
+# covered by the Apache 2.0 License, other features require a commercial license.
+#
+# GitHub Repo: https://github.com/cloudrhinoltd/ngx-waf-protect
+# Contact Email: cloudrhinoltd@gmail.com
+
 package main
 
 import (
@@ -14,7 +35,8 @@ func readFullCommand(reader *bufio.Reader) (string, error) {
 	var command strings.Builder
 
 	// Read the first line to determine if it's an array
-	line, err := reader.ReadString('\n')
+	line, err := reader.ReadString('
+')
 	if err != nil {
 		return "", err
 	}
@@ -27,7 +49,8 @@ func readFullCommand(reader *bufio.Reader) (string, error) {
 
 		for i := 0; i < arrayLen; i++ {
 			// Read the bulk string length
-			lenLine, err := reader.ReadString('\n')
+			lenLine, err := reader.ReadString('
+')
 			if err != nil {
 				return "", err
 			}
@@ -36,7 +59,8 @@ func readFullCommand(reader *bufio.Reader) (string, error) {
 			// Read the actual data
 			length := 0
 			fmt.Sscanf(lenLine, "$%d", &length)
-			data := make([]byte, length+2) // +2 for \r\n
+			data := make([]byte, length+2) // +2 for 
+
 			_, err = reader.Read(data)
 			if err != nil {
 				return "", err
@@ -83,21 +107,24 @@ func TestHandleConnection_AuthAndPing(t *testing.T) {
 		// Handle AUTH command
 		authCmd, _ := readFullCommand(reader)
 		if strings.Contains(authCmd, "AUTH") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle SELECT command
 		selectCmd, _ := readFullCommand(reader)
 		if strings.Contains(selectCmd, "SELECT") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle PING command
 		pingCmd, _ := readFullCommand(reader)
 		if strings.Contains(pingCmd, "PING") {
-			_, _ = writer.WriteString("+PONG\r\n")
+			_, _ = writer.WriteString("+PONG
+")
 			writer.Flush()
 		}
 
@@ -142,7 +169,12 @@ func TestHandleConnection_AuthAndPing(t *testing.T) {
 	}
 
 	// Step 1: Send AUTH command and read response
-	clientConn.Write([]byte("*2\r\n$4\r\nAUTH\r\n$14\r\nnewpassword123\r\n"))
+	clientConn.Write([]byte("*2
+$4
+AUTH
+$14
+newpassword123
+"))
 
 	authResponse := make([]byte, 1024)
 	n, err := clientConn.Read(authResponse)
@@ -150,13 +182,17 @@ func TestHandleConnection_AuthAndPing(t *testing.T) {
 		t.Fatalf("Error reading AUTH response: %v", err)
 	}
 
-	expectedAuthResponse := "+OK\r\n"
+	expectedAuthResponse := "+OK
+"
 	if string(authResponse[:n]) != expectedAuthResponse {
 		t.Errorf("Expected AUTH response %q, but got %q", expectedAuthResponse, string(authResponse[:n]))
 	}
 
 	// Step 2: Send PING command and read response
-	clientConn.Write([]byte("*1\r\n$4\r\nPING\r\n"))
+	clientConn.Write([]byte("*1
+$4
+PING
+"))
 
 	pingResponse := make([]byte, 1024)
 	n, err = clientConn.Read(pingResponse)
@@ -164,7 +200,8 @@ func TestHandleConnection_AuthAndPing(t *testing.T) {
 		t.Fatalf("Error reading PING response: %v", err)
 	}
 
-	expectedPingResponse := "+PONG\r\n"
+	expectedPingResponse := "+PONG
+"
 	if string(pingResponse[:n]) != expectedPingResponse {
 		t.Errorf("Expected PING response %q, but got %q", expectedPingResponse, string(pingResponse[:n]))
 	}
@@ -208,7 +245,8 @@ func TestHandleConnection_InvalidAuth(t *testing.T) {
 		// Handle AUTH command
 		authCmd, _ := readFullCommand(reader)
 		if strings.Contains(authCmd, "AUTH") {
-			_, _ = writer.WriteString("-ERR invalid password\r\n")
+			_, _ = writer.WriteString("-ERR invalid password
+")
 			writer.Flush()
 		}
 
@@ -246,7 +284,12 @@ func TestHandleConnection_InvalidAuth(t *testing.T) {
 		t.Fatalf("Failed to connect to client listener: %v", err)
 	}
 
-	clientConn.Write([]byte("*2\r\n$4\r\nAUTH\r\n$15\r\ninvalidpassword\r\n"))
+	clientConn.Write([]byte("*2
+$4
+AUTH
+$15
+invalidpassword
+"))
 
 	authResponse := make([]byte, 1024)
 	n, err := clientConn.Read(authResponse)
@@ -254,7 +297,8 @@ func TestHandleConnection_InvalidAuth(t *testing.T) {
 		t.Fatalf("Error reading AUTH response: %v", err)
 	}
 
-	expectedAuthResponse := "-ERR invalid password\r\n"
+	expectedAuthResponse := "-ERR invalid password
+"
 	if string(authResponse[:n]) != expectedAuthResponse {
 		t.Errorf("Expected AUTH response %q, but got %q", expectedAuthResponse, string(authResponse[:n]))
 	}
@@ -297,28 +341,33 @@ func TestHandleConnection_SelectAndSetGetCommands(t *testing.T) {
 		// Handle AUTH command
 		authCmd, _ := readFullCommand(reader)
 		if strings.Contains(authCmd, "AUTH") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle SELECT command
 		selectCmd, _ := readFullCommand(reader)
 		if strings.Contains(selectCmd, "SELECT") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle SET command
 		setCmd, _ := readFullCommand(reader)
 		if strings.Contains(setCmd, "SET") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle GET command
 		getCmd, _ := readFullCommand(reader)
 		if strings.Contains(getCmd, "GET") {
-			_, _ = writer.WriteString("$3\r\nbar\r\n") // Return "bar" for simplicity
+			_, _ = writer.WriteString("$3
+bar
+") // Return "bar" for simplicity
 			writer.Flush()
 		}
 
@@ -357,49 +406,76 @@ func TestHandleConnection_SelectAndSetGetCommands(t *testing.T) {
 	}
 
 	// Step 1: Send AUTH command
-	clientConn.Write([]byte("*2\r\n$4\r\nAUTH\r\n$14\r\nnewpassword123\r\n"))
+	clientConn.Write([]byte("*2
+$4
+AUTH
+$14
+newpassword123
+"))
 	authResponse := make([]byte, 1024)
 	n, err := clientConn.Read(authResponse)
 	if err != nil {
 		t.Fatalf("Error reading AUTH response: %v", err)
 	}
-	expectedAuthResponse := "+OK\r\n"
+	expectedAuthResponse := "+OK
+"
 	if string(authResponse[:n]) != expectedAuthResponse {
 		t.Errorf("Expected AUTH response %q, but got %q", expectedAuthResponse, string(authResponse[:n]))
 	}
 
 	// Step 2: Send SELECT command
-	clientConn.Write([]byte("*2\r\n$6\r\nSELECT\r\n$1\r\n1\r\n"))
+	clientConn.Write([]byte("*2
+$6
+SELECT
+$1
+1
+"))
 	selectResponse := make([]byte, 1024)
 	n, err = clientConn.Read(selectResponse)
 	if err != nil {
 		t.Fatalf("Error reading SELECT response: %v", err)
 	}
-	expectedSelectResponse := "+OK\r\n"
+	expectedSelectResponse := "+OK
+"
 	if string(selectResponse[:n]) != expectedSelectResponse {
 		t.Errorf("Expected SELECT response %q, but got %q", expectedSelectResponse, string(selectResponse[:n]))
 	}
 
 	// Step 3: Send SET command
-	clientConn.Write([]byte("*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"))
+	clientConn.Write([]byte("*3
+$3
+SET
+$3
+foo
+$3
+bar
+"))
 	setResponse := make([]byte, 1024)
 	n, err = clientConn.Read(setResponse)
 	if err != nil {
 		t.Fatalf("Error reading SET response: %v", err)
 	}
-	expectedSetResponse := "+OK\r\n"
+	expectedSetResponse := "+OK
+"
 	if string(setResponse[:n]) != expectedSetResponse {
 		t.Errorf("Expected SET response %q, but got %q", expectedSetResponse, string(setResponse[:n]))
 	}
 
 	// Step 4: Send GET command
-	clientConn.Write([]byte("*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n"))
+	clientConn.Write([]byte("*2
+$3
+GET
+$3
+foo
+"))
 	getResponse := make([]byte, 1024)
 	n, err = clientConn.Read(getResponse)
 	if err != nil {
 		t.Fatalf("Error reading GET response: %v", err)
 	}
-	expectedGetResponse := "$3\r\nbar\r\n"
+	expectedGetResponse := "$3
+bar
+"
 	if string(getResponse[:n]) != expectedGetResponse {
 		t.Errorf("Expected GET response %q, but got %q", expectedGetResponse, string(getResponse[:n]))
 	}
@@ -442,21 +518,24 @@ func TestHandleConnection_InvalidCommands(t *testing.T) {
 		// Handle AUTH command
 		authCmd, _ := readFullCommand(reader)
 		if strings.Contains(authCmd, "AUTH") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle SELECT command
 		selectCmd, _ := readFullCommand(reader)
 		if strings.Contains(selectCmd, "SELECT") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle invalid command
 		invalidCmd, _ := readFullCommand(reader)
 		if strings.Contains(invalidCmd, "INVALID") {
-			_, _ = writer.WriteString("-ERR unknown command\r\n")
+			_, _ = writer.WriteString("-ERR unknown command
+")
 			writer.Flush()
 		}
 
@@ -495,25 +574,35 @@ func TestHandleConnection_InvalidCommands(t *testing.T) {
 	}
 
 	// Step 1: Send AUTH command
-	clientConn.Write([]byte("*2\r\n$4\r\nAUTH\r\n$14\r\nnewpassword123\r\n"))
+	clientConn.Write([]byte("*2
+$4
+AUTH
+$14
+newpassword123
+"))
 	authResponse := make([]byte, 1024)
 	n, err := clientConn.Read(authResponse)
 	if err != nil {
 		t.Fatalf("Error reading AUTH response: %v", err)
 	}
-	expectedAuthResponse := "+OK\r\n"
+	expectedAuthResponse := "+OK
+"
 	if string(authResponse[:n]) != expectedAuthResponse {
 		t.Errorf("Expected AUTH response %q, but got %q", expectedAuthResponse, string(authResponse[:n]))
 	}
 
 	// Step 2: Send an invalid command
-	clientConn.Write([]byte("*1\r\n$7\r\nINVALID\r\n"))
+	clientConn.Write([]byte("*1
+$7
+INVALID
+"))
 	invalidResponse := make([]byte, 1024)
 	n, err = clientConn.Read(invalidResponse)
 	if err != nil {
 		t.Fatalf("Error reading invalid command response: %v", err)
 	}
-	expectedInvalidResponse := "-ERR unknown command\r\n"
+	expectedInvalidResponse := "-ERR unknown command
+"
 	if string(invalidResponse[:n]) != expectedInvalidResponse {
 		t.Errorf("Expected invalid command response %q, but got %q", expectedInvalidResponse, string(invalidResponse[:n]))
 	}
@@ -557,14 +646,16 @@ func TestHandleConnection_AuthTimeout(t *testing.T) {
 		authCmd, _ := readFullCommand(reader)
 		if strings.Contains(authCmd, "AUTH") {
 			time.Sleep(6 * time.Second) // Delay longer than the client timeout
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
 		// Handle SELECT command
 		selectCmd, _ := readFullCommand(reader)
 		if strings.Contains(selectCmd, "SELECT") {
-			_, _ = writer.WriteString("+OK\r\n")
+			_, _ = writer.WriteString("+OK
+")
 			writer.Flush()
 		}
 
@@ -612,7 +703,12 @@ func TestHandleConnection_AuthTimeout(t *testing.T) {
 	clientConn.SetWriteDeadline(time.Now().Add(3 * time.Second))
 
 	// Step 1: Send AUTH command and simulate timeout
-	clientConn.Write([]byte("*2\r\n$4\r\nAUTH\r\n$14\r\nnewpassword123\r\n"))
+	clientConn.Write([]byte("*2
+$4
+AUTH
+$14
+newpassword123
+"))
 
 	authResponse := make([]byte, 1024)
 	n, err := clientConn.Read(authResponse)

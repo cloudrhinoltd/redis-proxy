@@ -19,34 +19,30 @@
 # GitHub Repo: https://github.com/cloudrhinoltd/ngx-waf-protect
 # Contact Email: cloudrhinoltd@gmail.com
 
-# # Use the official Golang image to create a build artifact.
-FROM golang:1.22.1 as builder
+name: Run Tests
 
-# # Set the working directory inside the container
-WORKDIR /app
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # Allows manually triggering the workflow from the GitHub Actions UI
 
-# # Copy go mod and sum files along with the vendor directory
-COPY src/go.mod src/go.sum ./
+jobs:
+  test:
+    runs-on: ubuntu-latest
 
-# # Copy the source code
-COPY src/*.go ./
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-RUN go mod tidy
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20' # Specify your Go version
 
-# # Build the Go app using the vendor directory
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+      - name: Install dependencies
+        run: go mod tidy
 
-# # Use a minimal alpine image for the final build
-FROM alpine:3.14 
-
-# Set the working directory inside the container
-WORKDIR /root/
-
-# Copy the pre-built binary file from the builder stage
-COPY --from=builder /app/main .
-
-# Expose port 6379
-EXPOSE 6379
-
-# Run the executable
-CMD ["./main"]
+      - name: Run Tests
+        run: go test src/... -v

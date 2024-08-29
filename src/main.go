@@ -1,3 +1,24 @@
+# Copyright (C) 2024 Cloud Rhino Pty Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# This Dockerfile contains parts under a dual-license:
+# Only the 'enable_protocol_attack' and 'enable_general_rules' features are 
+# covered by the Apache 2.0 License, other features require a commercial license.
+#
+# GitHub Repo: https://github.com/cloudrhinoltd/ngx-waf-protect
+# Contact Email: cloudrhinoltd@gmail.com
+
 package main
 
 import (
@@ -32,7 +53,8 @@ var size int32 = 1024
 var clientCreds atomic.Value // Holds map[string]map[string]interface{}
 var redisPassword, redisConnString string
 
-var singleOkResponse = []byte("+OK\r\n")
+var singleOkResponse = []byte("+OK
+")
 
 type ClientInfo struct {
 	isAuthenticated bool
@@ -343,7 +365,8 @@ func handleConnection(conn net.Conn, dialFunc dialFuncType) {
 					return
 				}
 
-				line, err := bufReader.ReadString('\n')
+				line, err := bufReader.ReadString('
+')
 				if err != nil {
 					log.Printf("Failed to read 2: %v", err)
 					return
@@ -362,7 +385,8 @@ func handleConnection(conn net.Conn, dialFunc dialFuncType) {
 						return
 					}
 
-					lenStr, err := bufReader.ReadString('\n')
+					lenStr, err := bufReader.ReadString('
+')
 					if err != nil {
 						log.Printf("Failed to read length of argument: %v", err)
 						return
@@ -384,7 +408,8 @@ func handleConnection(conn net.Conn, dialFunc dialFuncType) {
 					commandParts = append(commandParts, string(argBytes))
 				}
 			} else {
-				commandLine := strings.TrimRight(string(commandBuf), "\r\n")
+				commandLine := strings.TrimRight(string(commandBuf), "
+")
 				commandParts = strings.Split(commandLine, " ")
 			}
 
@@ -447,14 +472,16 @@ func handleAuth(redisConn net.Conn, conn net.Conn, password string) bool {
 	credsMap, ok := clientCreds.Load().(map[string]map[string]interface{})
 	if !ok || credsMap == nil {
 		log.Printf("[handleAuth] credsMap is nil or invalid")
-		conn.Write([]byte("-ERR internal server error\r\n"))
+		conn.Write([]byte("-ERR internal server error
+"))
 		return false
 	}
 
 	// Look up the credentials for the provided password
 	creds, ok := credsMap[password]
 	if !ok {
-		conn.Write([]byte("-ERR invalid password\r\n"))
+		conn.Write([]byte("-ERR invalid password
+"))
 		log.Printf("[handleAuth] Wrong password client: %v", password)
 		return false
 	}
@@ -462,27 +489,40 @@ func handleAuth(redisConn net.Conn, conn net.Conn, password string) bool {
 	// Check if the credentials have an expiration and if they are expired
 	if validUntil, exists := creds["valid_until"]; exists {
 		if time.Now().After(validUntil.(time.Time)) {
-			conn.Write([]byte("-ERR password expired\r\n"))
+			conn.Write([]byte("-ERR password expired
+"))
 			log.Printf("[handleAuth] Password expired: %v", password)
 			return false
 		}
 	}
 
 	// Prepare the AUTH and SELECT commands for Redis
-	authCommand := fmt.Sprintf("*2\r\n$4\r\nAUTH\r\n$%d\r\n%s\r\n", len(redisPassword), redisPassword)
-	selectCommand := fmt.Sprintf("*2\r\n$6\r\nSELECT\r\n$%d\r\n%s\r\n", len(creds["dbIndex"].(string)), creds["dbIndex"].(string))
+	authCommand := fmt.Sprintf("*2
+$4
+AUTH
+$%d
+%s
+", len(redisPassword), redisPassword)
+	selectCommand := fmt.Sprintf("*2
+$6
+SELECT
+$%d
+%s
+", len(creds["dbIndex"].(string)), creds["dbIndex"].(string))
 	commands := []string{authCommand, selectCommand}
 
 	// Send the commands to Redis and check for success
 	for _, command := range commands {
 		if _, err := redisConn.Write([]byte(command)); err != nil {
 			log.Printf("[handleAuth] Failed to write command to Redis: %v", err)
-			conn.Write([]byte("-ERR internal server error\r\n"))
+			conn.Write([]byte("-ERR internal server error
+"))
 			return false
 		}
 		if _, err := readResponse(bufio.NewReader(redisConn)); err != nil {
 			log.Printf("[handleAuth] Failed to read response from Redis: %v", err)
-			conn.Write([]byte("-ERR internal server error\r\n"))
+			conn.Write([]byte("-ERR internal server error
+"))
 			return false
 		}
 	}
@@ -518,13 +558,15 @@ func readResponse(reader *bufio.Reader) ([]byte, error) {
 
 	switch prefix {
 	case '+', '-', ':':
-		line, err := reader.ReadBytes('\n')
+		line, err := reader.ReadBytes('
+')
 		if err != nil {
 			return nil, err
 		}
 		buf.Write(line)
 	case '$':
-		lengthStr, err := reader.ReadString('\n')
+		lengthStr, err := reader.ReadString('
+')
 		if err != nil {
 			return nil, err
 		}
@@ -544,7 +586,8 @@ func readResponse(reader *bufio.Reader) ([]byte, error) {
 			buf.Write(data)
 		}
 	case '*':
-		lengthStr, err := reader.ReadString('\n')
+		lengthStr, err := reader.ReadString('
+')
 		if err != nil {
 			return nil, err
 		}
@@ -578,9 +621,11 @@ func isCommandEnd(buf []byte) bool {
 
 	switch buf[0] {
 	case '+', '-': // Simple strings or errors
-		return bytes.HasSuffix(buf, []byte("\r\n"))
+		return bytes.HasSuffix(buf, []byte("
+"))
 	case ':': // Integers
-		return bytes.HasSuffix(buf, []byte("\r\n"))
+		return bytes.HasSuffix(buf, []byte("
+"))
 	case '$': // Bulk strings
 		return isBulkStringComplete(buf)
 	case '*': // Arrays
@@ -591,7 +636,8 @@ func isCommandEnd(buf []byte) bool {
 }
 
 func isBulkStringComplete(buf []byte) bool {
-	crlfPos := bytes.Index(buf, []byte("\r\n"))
+	crlfPos := bytes.Index(buf, []byte("
+"))
 	if crlfPos == -1 {
 		return false
 	}
@@ -611,7 +657,8 @@ func isArrayComplete(buf []byte) bool {
 	var lastArrayEnd int
 
 	for currentPos < len(buf) && buf[currentPos] == '*' {
-		crlfPos := bytes.Index(buf[currentPos:], []byte("\r\n"))
+		crlfPos := bytes.Index(buf[currentPos:], []byte("
+"))
 		if crlfPos == -1 {
 			return false // Incomplete array length specifier
 		}
@@ -630,7 +677,8 @@ func isArrayComplete(buf []byte) bool {
 				return false // Incomplete or invalid bulk string
 			}
 
-			nextCrlfPos := bytes.Index(buf[currentPos:], []byte("\r\n"))
+			nextCrlfPos := bytes.Index(buf[currentPos:], []byte("
+"))
 			if nextCrlfPos == -1 {
 				return false // Incomplete bulk string length specifier
 			}
@@ -657,7 +705,8 @@ func getLastBulkLength(buf []byte) (int32, bool) {
 		return 0, false
 	}
 
-	crlfPos := bytes.Index(buf, []byte("\r\n"))
+	crlfPos := bytes.Index(buf, []byte("
+"))
 	if crlfPos == -1 {
 		return 0, false // No CRLF found, incomplete command
 	}
@@ -681,7 +730,8 @@ func getLastBulkLength(buf []byte) (int32, bool) {
 			return 0, false // Invalid bulk string length specifier
 		}
 
-		crlfPos = bytes.Index(buf[currentPos:], []byte("\r\n"))
+		crlfPos = bytes.Index(buf[currentPos:], []byte("
+"))
 		if crlfPos == -1 {
 			return 0, false // Incomplete bulk string length
 		}
@@ -718,7 +768,8 @@ func findCommandEnd(buf []byte, totalBuf []byte) (int, error) {
 }
 
 func findInlineCommandEnd(buf []byte) (int, error) {
-	if newlinePos := bytes.IndexByte(buf, '\n'); newlinePos != -1 {
+	if newlinePos := bytes.IndexByte(buf, '
+'); newlinePos != -1 {
 		commandLine := string(buf[:newlinePos])
 		if !isBalancedQuotes(commandLine) {
 			return 0, fmt.Errorf("unbalanced quotes in command: %s", commandLine)
@@ -733,7 +784,7 @@ func isBalancedQuotes(s string) bool {
 	var escaped bool
 	for _, ch := range s {
 		switch ch {
-		case '\\':
+		case '\':
 			escaped = !escaped
 		case '"':
 			if !escaped {
@@ -750,7 +801,8 @@ func isBalancedQuotes(s string) bool {
 func findArrayEnd(buf []byte, totalBuf []byte) (int, error) {
 	offset := len(totalBuf) - len(buf)
 
-	lineEnd := bytes.Index(buf, []byte("\r\n"))
+	lineEnd := bytes.Index(buf, []byte("
+"))
 	if lineEnd == -1 {
 		log.Printf("Incomplete array, buffer: %s", string(buf))
 		return 0, fmt.Errorf("incomplete array")
@@ -774,7 +826,8 @@ func findArrayEnd(buf []byte, totalBuf []byte) (int, error) {
 			return 0, fmt.Errorf("expected bulk string")
 		}
 
-		lineEnd = bytes.Index(buf[pos:], []byte("\r\n"))
+		lineEnd = bytes.Index(buf[pos:], []byte("
+"))
 		if lineEnd == -1 {
 			log.Printf("Incomplete bulk string, buffer: %s", string(buf))
 			return 0, fmt.Errorf("incomplete bulk string")
@@ -790,7 +843,10 @@ func findArrayEnd(buf []byte, totalBuf []byte) (int, error) {
 
 		if nextPos+offset > len(totalBuf) {
 			log.Printf("Attempting to jump beyond buffer length: nextPos = %d, buffer length = %d, buffer: %s", nextPos+offset, len(totalBuf), string(buf))
-			log.Printf("\n\n\ntotalBuf: %s", string(totalBuf))
+			log.Printf("
+
+
+totalBuf: %s", string(totalBuf))
 			return 0, fmt.Errorf("attempting to jump beyond buffer length")
 		}
 
